@@ -1,16 +1,13 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import {
     Users,
     UserPlus,
     Search,
-    MoreHorizontal,
     ShieldCheck,
     Briefcase,
     Trash2,
-    Edit2,
-    CheckCircle2,
-    AlertCircle
+    Edit2
 } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { useState } from 'react';
@@ -21,7 +18,6 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

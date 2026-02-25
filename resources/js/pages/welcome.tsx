@@ -5,8 +5,6 @@ import Metrics from '@/components/landing/Metrics';
 import Features from '@/components/landing/Features';
 import Analytics from '@/components/landing/Analytics';
 import Testimonials from '@/components/landing/Testimonials';
-import Pricing from '@/components/landing/Pricing';
-import CTA from '@/components/landing/CTA';
 import Footer from '@/components/landing/Footer';
 
 export default function Welcome() {

@@ -43,7 +43,7 @@ class RegisteredUserController extends Controller
         ]);
 
         // First-user logic from Photo 1
-        if (User::count() === 1) {
+        if (User::count() === 1 && \Spatie\Permission\Models\Role::where('name', 'Super Administrator')->exists()) {
             $user->assignRole('Super Administrator');
         }
 

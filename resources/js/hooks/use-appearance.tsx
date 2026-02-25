@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type Appearance = 'light' | 'dark' | 'system';
 
-const prefersDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-const applyTheme = (appearance: Appearance) => {
+const applyTheme = () => {
     // Force light mode regardless of preference
     document.documentElement.classList.remove('dark');
 };
@@ -12,14 +11,11 @@ const applyTheme = (appearance: Appearance) => {
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 const handleSystemThemeChange = () => {
-    const currentAppearance = localStorage.getItem('appearance') as Appearance;
-    applyTheme(currentAppearance || 'system');
+    applyTheme();
 };
 
 export function initializeTheme() {
-    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'light';
-
-    applyTheme(savedAppearance);
+    applyTheme();
 
     // Add the event listener for system theme changes...
     mediaQuery.addEventListener('change', handleSystemThemeChange);
@@ -28,18 +24,18 @@ export function initializeTheme() {
 export function useAppearance() {
     const [appearance, setAppearance] = useState<Appearance>('system');
 
-    const updateAppearance = (mode: Appearance) => {
+    const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
         localStorage.setItem('appearance', mode);
-        applyTheme(mode);
-    };
+        applyTheme();
+    }, []);
 
     useEffect(() => {
         const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
         updateAppearance(savedAppearance || 'system');
 
         return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
-    }, []);
+    }, [updateAppearance]); // Added updateAppearance to dependency array for linting, though it's stable.
 
     return { appearance, updateAppearance };
 }
