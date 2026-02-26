@@ -4,7 +4,6 @@ import {
     BarChart,
     Bar,
     XAxis,
-    YAxis,
     CartesianGrid,
     Tooltip,
     LineChart,
@@ -13,7 +12,8 @@ import {
     Pie,
     Cell
 } from 'recharts';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const attendanceData = [
     { name: 'Mon', value: 92 },
@@ -50,100 +50,145 @@ export default function Analytics() {
     if (!isMounted) return <section id="analytics" className="py-24 bg-background h-[600px]" />;
 
     return (
-        <section id="analytics" className="py-24 bg-background overflow-hidden relative border-y border-border/50">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col lg:flex-row items-center gap-16">
+        <section id="analytics" className="py-32 bg-background overflow-hidden relative border-y border-zinc-200/50">
+            <div className="absolute bottom-[-10%] right-[-5%] size-[30%] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+                <div className="flex flex-col lg:flex-row items-center gap-20">
                     {/* Content */}
-                    <div className="flex-1">
-                        <h2 className="text-3xl font-bold text-foreground tracking-tight sm:text-4xl mb-6">
-                            Insightful People Analytics
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        className="flex-1"
+                    >
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest mb-6">
+                            Insights Engine
+                        </div>
+                        <h2 className="text-4xl font-black text-zinc-950 tracking-tight sm:text-5xl mb-8 leading-[1.1]">
+                            Data-Driven <br /><span className="text-primary italic">Intelligence.</span>
                         </h2>
-                        <p className="text-lg text-muted-foreground mb-10 leading-relaxed font-medium">
-                            Navigate complexity with data. HRIS Pro provides real-time visibility
-                            into attendance patterns, performance trends, and organizational health.
+                        <p className="text-lg text-zinc-500 mb-12 leading-relaxed font-medium">
+                            Don't just manage. Understand. HRIS Pro transforms complex workforce data
+                            into clear, actionable strategies with real-time analytics.
                         </p>
 
-                        <div className="space-y-5">
+                        <div className="space-y-6">
                             {[
-                                'Real-time attendance dashboards',
-                                'Automated performance scoring',
-                                'Organizational structure insights',
-                                'Predictive turnover analysis'
+                                'Live attendance heatmaps',
+                                'AI-powered turnover predictions',
+                                'Departmental efficiency scores',
+                                'Global workforce distribution'
                             ].map((bullet, i) => (
-                                <div key={i} className="flex items-center gap-4">
-                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                        <CheckCircle2 size={16} />
+                                <div key={i} className="flex items-center gap-4 group">
+                                    <div className="flex-shrink-0 size-6 rounded-full bg-zinc-950 flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform">
+                                        <CheckCircle2 size={14} />
                                     </div>
-                                    <span className="text-base font-semibold text-foreground/90">{bullet}</span>
+                                    <span className="text-base font-bold text-zinc-900">{bullet}</span>
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Preview Cards */}
-                    <div className="flex-1 w-full grid grid-cols-2 gap-6">
-                        <div className="col-span-2 bg-card rounded-2xl border border-border/50 p-8 shadow-sm h-72">
-                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 block">
-                                Weekly Attendance (%)
-                            </span>
+                    <div className="flex-1 w-full grid grid-cols-2 gap-6 relative">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="col-span-2 glass-card rounded-[2rem] border-white/60 p-10 shadow-2xl h-80 relative overflow-hidden group"
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                                    Attendance Trends (%)
+                                </span>
+                                <ArrowUpRight size={16} className="text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
                             <div className="h-[180px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={attendanceData}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
-                                        <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'currentColor', opacity: 0.5 }} />
-                                        <YAxis domain={[0, 100]} fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'currentColor', opacity: 0.5 }} />
+                                        <defs>
+                                            <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={1} />
+                                                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.6} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.05} />
+                                        <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'currentColor', opacity: 0.4 }} />
                                         <Tooltip
-                                            cursor={{ fill: 'currentColor', opacity: 0.05 }}
+                                            cursor={{ fill: 'currentColor', opacity: 0.03 }}
                                             contentStyle={{
-                                                backgroundColor: 'var(--card)',
-                                                borderRadius: '8px',
-                                                border: '1px solid var(--border)',
-                                                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                backdropFilter: 'blur(10px)',
+                                                borderRadius: '16px',
+                                                border: '1px solid rgba(255, 255, 255, 0.4)',
+                                                boxShadow: '0 20px 40px -15px rgba(0,0,0,0.1)'
                                             }}
                                         />
-                                        <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="bg-card rounded-2xl border border-border/50 p-8 shadow-sm h-64 flex flex-col">
-                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 block">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className="glass-card rounded-[2rem] border-white/60 p-8 shadow-2xl h-64 flex flex-col"
+                        >
+                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 block">
                                 Performance
                             </span>
                             <div className="flex-1 h-full w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={perfData}>
-                                        <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderRadius: '8px', border: '1px solid var(--border)' }} />
-                                        <Line type="monotone" dataKey="score" stroke="#3B82F6" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: '#3B82F6' }} />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="score"
+                                            stroke="var(--color-primary)"
+                                            strokeWidth={4}
+                                            dot={{ r: 0, fill: 'var(--color-primary)' }}
+                                            activeDot={{ r: 6, strokeWidth: 0 }}
+                                        />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="bg-card rounded-2xl border border-border/50 p-8 shadow-sm h-64 flex flex-col items-center">
-                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6 block w-full text-left">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.3 }}
+                            className="bg-zinc-950 rounded-[2rem] p-8 shadow-2xl h-64 flex flex-col items-center"
+                        >
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-6 block w-full text-left">
                                 Headcount
                             </span>
-                            <div className="flex-1 h-full w-full">
+                            <div className="flex-1 h-full w-full relative">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
                                             data={deptData}
-                                            innerRadius={45}
-                                            outerRadius={65}
+                                            innerRadius={40}
+                                            outerRadius={60}
                                             paddingAngle={8}
                                             dataKey="value"
                                             stroke="none"
                                         >
                                             {deptData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                <Cell key={`cell - ${index} `} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
                                     </PieChart>
                                 </ResponsiveContainer>
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <span className="text-xl font-black text-white">82%</span>
+                                </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>

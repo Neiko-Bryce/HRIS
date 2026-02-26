@@ -65,6 +65,7 @@ class UserController extends Controller
                 'employee_id' => $employeeId,
                 'department_id' => $request->department_id,
                 'position' => $request->position,
+                'join_date' => now(),
                 'status' => 'active',
             ]);
 

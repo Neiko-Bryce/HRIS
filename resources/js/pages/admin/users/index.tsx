@@ -39,6 +39,7 @@ interface User {
         department_id: number;
         position: string;
         status: string;
+        photo_path?: string | null;
         department_relation?: { name: string };
     };
 }
@@ -56,9 +57,10 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
         name: '',
         email: '',
         password: '',
-        role: 'Employee',
+        role: '',
         department_id: '',
         position: '',
+        status: 'active',
     });
 
     const openCreate = () => {
@@ -69,14 +71,16 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
 
     const openEdit = (user: User) => {
         setCurrentUser(user);
-        setData({
+        setData((prev) => ({
+            ...prev,
             name: user.name,
             email: user.email,
             password: '',
-            role: user.roles[0]?.name || 'Employee',
+            role: user.roles?.[0]?.name || 'Employee',
             department_id: user.employee?.department_id?.toString() || '',
             position: user.employee?.position || '',
-        });
+            status: user.employee?.status || 'active'
+        }));
         clearErrors();
         setIsEditOpen(true);
     };
@@ -162,8 +166,12 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-red-500" onClick={() => { setCurrentUser(user); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center font-black text-zinc-900 border border-zinc-200">
-                                        {user.name.charAt(0)}
+                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center font-black text-zinc-900 border border-zinc-200 overflow-hidden">
+                                        {user.employee?.photo_path ? (
+                                            <img src={`/storage/${user.employee.photo_path}`} className="w-full h-full object-cover" alt={user.name} />
+                                        ) : (
+                                            user.name.charAt(0)
+                                        )}
                                     </div>
                                     <div>
                                         <p className="font-bold text-zinc-900">{user.name}</p>
@@ -215,8 +223,12 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
                                         <tr key={user.id} className="hover:bg-primary/[0.02] transition-colors group">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border">
-                                                        {user.name.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border overflow-hidden">
+                                                        {user.employee?.photo_path ? (
+                                                            <img src={`/storage/${user.employee.photo_path}`} className="w-full h-full object-cover" alt={user.name} />
+                                                        ) : (
+                                                            user.name.charAt(0)
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-foreground leading-none mb-1">{user.name}</p>
@@ -265,9 +277,8 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
                 </div>
             </div>
 
-            {/* Create Modal */}
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitCreate}>
                         <div className="p-6 pb-0">
                             <DialogHeader>
@@ -336,68 +347,116 @@ export default function UserIndex({ users, departments }: { users: User[]; depar
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitEdit}>
                         <div className="p-6 pb-0">
                             <DialogHeader>
                                 <DialogTitle className="text-xl font-black flex items-center gap-2">
-                                    <Edit2 className="text-primary" size={20} />
-                                    Edit Employee Profile
+                                    <ShieldCheck className="text-primary" size={20} />
+                                    Edit System Account
                                 </DialogTitle>
+                                <DialogDescription>Update user credentials and administrative permissions.</DialogDescription>
                             </DialogHeader>
                         </div>
-                        <div className="p-6 grid gap-4 overflow-y-auto max-h-[70vh]">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Full Name</Label>
-                                    <Input className="rounded-xl" value={data.name} onChange={e => setData('name', e.target.value)} required />
-                                    {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name}</p>}
+                        <div className="p-6 grid gap-6 overflow-y-auto max-h-[70vh]">
+                            {/* Personal Info Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/50">
+                                    <div className="h-px flex-1 bg-border" />
+                                    Account Identity
+                                    <div className="h-px flex-1 bg-border" />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Work Email</Label>
-                                    <Input className="rounded-xl" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required />
-                                    {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="flex justify-between">
-                                    <span>Password</span>
-                                    <span className="text-[10px] text-muted-foreground italic font-medium">(Leave blank to keep current)</span>
-                                </Label>
-                                <Input className="rounded-xl" type="password" value={data.password} onChange={e => setData('password', e.target.value)} placeholder="••••••••" />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>System Role</Label>
-                                    <Select value={data.role} onValueChange={(val) => setData('role', val)}>
-                                        <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select role" /></SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                            <SelectItem value="Super Administrator">Super Admin</SelectItem>
-                                            <SelectItem value="HR Administrator">HR Admin</SelectItem>
-                                            <SelectItem value="Head Employee">Head Employee</SelectItem>
-                                            <SelectItem value="Employee">Employee</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Department</Label>
-                                    <Select value={data.department_id} onValueChange={(val) => setData('department_id', val)}>
-                                        <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select dept" /></SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                            {departments.map(d => <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Full Name</Label>
+                                        <Input className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 transition-all font-medium" value={data.name} onChange={e => setData('name', e.target.value)} required />
+                                        {errors.name && <p className="text-[10px] text-red-500 font-medium">{errors.name}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Work Email</Label>
+                                        <Input className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 transition-all font-medium" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required />
+                                        {errors.email && <p className="text-[10px] text-red-500 font-medium">{errors.email}</p>}
+                                    </div>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Job Position</Label>
-                                <Input className="rounded-xl" value={data.position} onChange={e => setData('position', e.target.value)} />
+
+                            {/* Security Section */}
+                            <div className="space-y-4 pt-2">
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/50">
+                                    <div className="h-px flex-1 bg-border" />
+                                    Security & Auth
+                                    <div className="h-px flex-1 bg-border" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1 flex justify-between">
+                                        <span>Update Password</span>
+                                        <span className="italic opacity-60 font-normal underline">Leave blank to keep active</span>
+                                    </Label>
+                                    <Input className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 transition-all" type="password" value={data.password} onChange={e => setData('password', e.target.value)} placeholder="••••••••" />
+                                    {errors.password && <p className="text-[10px] text-red-500 font-medium">{errors.password}</p>}
+                                </div>
+                            </div>
+
+                            {/* Access Control Section */}
+                            <div className="space-y-4 pt-2">
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/50">
+                                    <div className="h-px flex-1 bg-border" />
+                                    System Access
+                                    <div className="h-px flex-1 bg-border" />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Access Level</Label>
+                                        <Select value={data.role} onValueChange={(val) => setData('role', val)}>
+                                            <SelectTrigger className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 h-10 overflow-hidden">
+                                                <SelectValue placeholder="Select role" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl">
+                                                <SelectItem value="Super Administrator">Super Admin</SelectItem>
+                                                <SelectItem value="HR Administrator">HR Admin</SelectItem>
+                                                <SelectItem value="Head Employee">Head Employee</SelectItem>
+                                                <SelectItem value="Employee">Employee</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.role && <p className="text-[10px] text-red-500 font-medium">{errors.role}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Account Status</Label>
+                                        <Select value={data.status} onValueChange={(val) => setData('status', val)}>
+                                            <SelectTrigger className={`rounded-xl border-border h-10 overflow-hidden ${data.status === 'active' ? 'bg-emerald-50/50 text-emerald-600' : 'bg-red-50/50 text-red-600'}`}>
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl">
+                                                <SelectItem value="active" className="text-emerald-600 font-bold italic">Active Account</SelectItem>
+                                                <SelectItem value="inactive" className="text-red-600 font-bold italic">Blocked / Inactive</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.status && <p className="text-[10px] text-red-500 font-medium">{errors.status}</p>}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Department</Label>
+                                        <Select value={data.department_id} onValueChange={(val) => setData('department_id', val)}>
+                                            <SelectTrigger className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 h-10 overflow-hidden">
+                                                <SelectValue placeholder="Select dept" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl">
+                                                {departments.map(d => <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold text-muted-foreground ml-1">Job Position</Label>
+                                        <Input className="rounded-xl bg-muted/30 border-border focus:ring-primary/20 transition-all font-medium" value={data.position} onChange={e => setData('position', e.target.value)} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="p-6 bg-muted/20 border-t border-border flex justify-end gap-3">
-                            <Button type="button" variant="outline" className="rounded-xl" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                            <Button type="submit" disabled={processing} className="rounded-xl bg-primary hover:bg-primary/90 px-8 shadow-sm font-bold">
-                                {processing ? 'Updating...' : 'Save Changes'}
+                        <div className="p-6 bg-muted/10 border-t border-border flex justify-end gap-3">
+                            <Button type="button" variant="outline" className="rounded-xl px-6 border-zinc-200" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={processing} className="rounded-xl bg-primary hover:bg-primary/90 px-10 shadow-lg shadow-primary/10 font-black tracking-widest text-xs uppercase">
+                                {processing ? 'Processing...' : 'Save Updates'}
                             </Button>
                         </div>
                     </form>

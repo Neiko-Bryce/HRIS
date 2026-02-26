@@ -17,6 +17,7 @@ class Employee extends Model
         'position',
         'salary_grade',
         'status',
+        'photo_path',
     ];
 
     public function user()

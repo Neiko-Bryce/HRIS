@@ -211,7 +211,7 @@ export default function DocumentIndex({ documents, users }: { documents: Doc[]; 
             </div>
 
             <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-                <DialogContent className="sm:max-w-[600px] bg-card border-border p-0 overflow-hidden shadow-2xl">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[600px] bg-card border-border p-0 overflow-hidden shadow-2xl">
                     <form onSubmit={submit}>
                         <div className="p-6 pb-0">
                             <DialogHeader>
@@ -380,7 +380,7 @@ export default function DocumentIndex({ documents, users }: { documents: Doc[]; 
                 </DialogContent>
             </Dialog>
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden shadow-2xl">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden shadow-2xl">
                     <form onSubmit={submitEdit}>
                         <div className="p-6 pb-0">
                             <DialogHeader>

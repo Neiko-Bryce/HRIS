@@ -234,7 +234,7 @@ export default function LeaveIndex({ leaves, users }: { leaves: LeaveReq[]; user
             </div>
 
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[500px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitCreate}>
                         <div className="p-6 pb-0">
                             <DialogHeader>

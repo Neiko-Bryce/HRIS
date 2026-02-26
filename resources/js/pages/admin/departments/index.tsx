@@ -157,7 +157,7 @@ export default function DepartmentIndex({ departments }: { departments: Departme
 
             {/* Create Modal */}
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="sm:max-w-[450px] bg-card border-border p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[450px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitCreate}>
                         <div className="p-6 pb-0">
                             <DialogHeader>
@@ -190,7 +190,7 @@ export default function DepartmentIndex({ departments }: { departments: Departme
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[450px] bg-card border-border p-0 overflow-hidden">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[450px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitEdit}>
                         <div className="p-6 pb-0">
                             <DialogHeader>

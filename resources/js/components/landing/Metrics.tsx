@@ -1,4 +1,5 @@
 import { Shield, TrendingUp, Users, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Metrics() {
     const metrics = [
@@ -9,25 +10,30 @@ export default function Metrics() {
     ];
 
     return (
-        <section className="py-24 bg-background relative z-10">
+        <section className="py-24 bg-background relative z-10 overflow-hidden">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="bg-card border border-border/50 rounded-3xl p-12 lg:p-16 shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
-                        {metrics.map((metric, i) => (
-                            <div key={i} className="flex flex-col items-center text-center group">
-                                <div className="p-4 rounded-2xl bg-secondary text-primary mb-6 border border-border/50 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
-                                    <metric.icon size={28} strokeWidth={1.5} />
-                                </div>
-                                <span className="text-4xl sm:text-5xl font-extrabold text-foreground mb-2 tracking-tight">
-                                    {metric.value}
-                                </span>
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                                    {metric.label}
-                                </span>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {metrics.map((metric, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.1, duration: 0.5 }}
+                            whileHover={{ y: -5 }}
+                            className="glass-card rounded-[2rem] p-8 flex flex-col items-center text-center transition-all hover:bg-white duration-500"
+                        >
+                            <div className="p-4 rounded-2xl bg-primary/10 text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                <metric.icon size={28} strokeWidth={1.5} />
                             </div>
-                        ))}
-                    </div>
+                            <h3 className="text-4xl sm:text-5xl font-black text-zinc-950 mb-2 tracking-tighter">
+                                {metric.value}
+                            </h3>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                                {metric.label}
+                            </p>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>

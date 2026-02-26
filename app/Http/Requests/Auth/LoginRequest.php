@@ -49,6 +49,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user->employee && $user->employee->status === 'inactive') {
+            Auth::guard('web')->logout();
+            throw ValidationException::withMessages([
+                'email' => 'Your account is currently inactive.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

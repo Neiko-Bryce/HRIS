@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -16,12 +17,13 @@ export default function Footer() {
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
                     <div className="col-span-2 lg:col-span-1">
                         <Link href="/" className="flex items-center gap-2 mb-6 group">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
-                                <span className="text-white font-black text-sm italic">H</span>
+                            <div className="w-10 h-10 bg-zinc-900 text-white flex aspect-square items-center justify-center rounded-xl shadow-xl border border-zinc-800 transition-transform group-hover:scale-105 duration-300">
+                                <AppLogoIcon className="size-6 fill-current" />
                             </div>
-                            <span className="text-xl font-black text-foreground tracking-tighter">
-                                HRIS<span className="text-accent">Pro</span>
-                            </span>
+                            <div className="grid text-left">
+                                <span className="truncate text-xl font-black tracking-tighter text-zinc-900 leading-none">HRIS</span>
+                                <span className="truncate text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-70">Enterprise</span>
+                            </div>
                         </Link>
                         <p className="text-sm text-muted-foreground leading-relaxed max-w-xs font-medium">
                             Enterprise-grade human resource management.

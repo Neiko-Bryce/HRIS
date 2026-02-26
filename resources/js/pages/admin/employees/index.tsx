@@ -4,7 +4,7 @@ import { Users, Search, Edit2, Trash2, Briefcase } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import React, { useState } from 'react';
 import {
-    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ interface Employee {
         email: string;
         roles: Array<{ name: string }>;
     };
+    photo_path: string | null;
     department_relation?: {
         name: string;
     } | null;
@@ -46,7 +47,7 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
     const [current, setCurrent] = useState<Employee | null>(null);
     const [search, setSearch] = useState('');
 
-    const { data, setData, put, delete: destroy, processing, clearErrors } = useForm({
+    const { data, setData, post, delete: destroy, processing, clearErrors } = useForm({
         contact_number: '',
         address: '',
         join_date: '',
@@ -55,6 +56,8 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
         position: '',
         salary_grade: '',
         status: 'active',
+        photo: null as File | null,
+        _method: 'put',
     });
 
     const openEdit = (emp: Employee) => {
@@ -68,6 +71,8 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
             position: emp.position || '',
             salary_grade: emp.salary_grade || '',
             status: emp.status || 'active',
+            photo: null,
+            _method: 'put',
         });
         clearErrors();
         setIsEditOpen(true);
@@ -76,7 +81,9 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!current) return;
-        put(route('admin.employees.update', current.id), {
+
+        post(route('admin.employees.update', current.id), {
+            forceFormData: true,
             onSuccess: () => setIsEditOpen(false),
         });
     };
@@ -140,8 +147,12 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-red-500" onClick={() => { setCurrent(emp); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
                                 </div>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center font-black text-zinc-900 border border-zinc-200">
-                                        {emp.user.name.charAt(0)}
+                                    <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center font-black text-zinc-900 border border-zinc-200 overflow-hidden">
+                                        {emp.photo_path ? (
+                                            <img src={`/storage/${emp.photo_path}`} className="w-full h-full object-cover" alt={emp.user.name} />
+                                        ) : (
+                                            emp.user.name.charAt(0)
+                                        )}
                                     </div>
                                     <div>
                                         <p className="font-bold text-zinc-900">{emp.user.name}</p>
@@ -187,8 +198,12 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                                         <tr key={emp.id} className="hover:bg-primary/[0.02] transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border">
-                                                        {emp.user.name.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border overflow-hidden">
+                                                        {emp.photo_path ? (
+                                                            <img src={`/storage/${emp.photo_path}`} className="w-full h-full object-cover" alt={emp.user.name} />
+                                                        ) : (
+                                                            emp.user.name.charAt(0)
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-foreground leading-none mb-1">{emp.user.name}</p>
@@ -227,66 +242,130 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-[550px] bg-card border-border">
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-[600px] bg-card border-border p-0 overflow-hidden">
                     <form onSubmit={submitEdit}>
-                        <DialogHeader>
-                            <DialogTitle className="text-xl font-bold flex items-center gap-2"><Edit2 className="text-primary" size={20} />Edit Employee</DialogTitle>
-                            <DialogDescription>Update employee details, department assignment, and status.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Contact Number</Label>
-                                    <Input value={data.contact_number} onChange={e => setData('contact_number', e.target.value)} placeholder="+63 9XX XXX XXXX" />
+                        <div className="p-6 pb-0">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-black flex items-center gap-2">
+                                    <div className="p-1.5 bg-primary/10 rounded-lg text-primary"><Users size={18} /></div>
+                                    Edit Employee Profile
+                                </DialogTitle>
+                                <DialogDescription>Update professional details and personal records.</DialogDescription>
+                            </DialogHeader>
+                        </div>
+
+                        <div className="p-6 grid gap-6 overflow-y-auto max-h-[70vh]">
+                            {/* Photo & Basic Info Header */}
+                            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-4 bg-muted/30 rounded-2xl border border-border/50">
+                                <div className="space-y-3 flex flex-col items-center">
+                                    <div className="relative group">
+                                        <div className="w-24 h-24 rounded-2xl bg-zinc-100 border-2 border-dashed border-zinc-200 overflow-hidden flex items-center justify-center relative">
+                                            {data.photo ? (
+                                                <img src={URL.createObjectURL(data.photo)} className="w-full h-full object-cover" alt="Preview" />
+                                            ) : current?.photo_path ? (
+                                                <img src={`/storage/${current.photo_path}`} className="w-full h-full object-cover" alt="Profile" />
+                                            ) : (
+                                                <Users size={32} className="text-zinc-300" />
+                                            )}
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                                <p className="text-[10px] font-black text-white uppercase tracking-tighter">Change Photo</p>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={(e) => setData('photo', e.target.files?.[0] || null)}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">ID: {current?.employee_id}</p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Join Date</Label>
-                                    <Input type="date" value={data.join_date} onChange={e => setData('join_date', e.target.value)} />
+                                <div className="flex-1 space-y-3">
+                                    <div className="grid grid-cols-1 gap-2">
+                                        <div>
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Full Name</Label>
+                                            <p className="text-lg font-black text-foreground tracking-tight">{current?.user.name}</p>
+                                        </div>
+                                        <div>
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Email Address</Label>
+                                            <p className="font-bold text-muted-foreground text-sm italic">{current?.user.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${current?.status === 'active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'}`}>
+                                            {current?.status}
+                                        </div>
+                                        <div className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-600 border border-zinc-200">
+                                            {current?.user.roles?.[0]?.name || 'No Role'}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1">Contact Number</Label>
+                                    <Input className="rounded-xl border-border bg-muted/20" value={data.contact_number} onChange={e => setData('contact_number', e.target.value)} placeholder="+63 9XX XXX XXXX" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1 flex justify-between">
+                                        <span>Join Date</span>
+                                        <span className="text-[10px] font-black italic opacity-50 uppercase tracking-tighter">Automated Field</span>
+                                    </Label>
+                                    <Input className="rounded-xl border-border bg-zinc-50 font-bold opacity-70" type="date" value={data.join_date} readOnly />
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label>Address</Label>
-                                <Input value={data.address} onChange={e => setData('address', e.target.value)} placeholder="Complete address" />
+                                <Label className="text-xs font-bold text-muted-foreground ml-1">Current Address</Label>
+                                <Input className="rounded-xl border-border bg-muted/20" value={data.address} onChange={e => setData('address', e.target.value)} placeholder="Complete home or residential address" />
                             </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Department</Label>
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1">Department Assignment</Label>
                                     <Select value={data.department_id?.toString() || ''} onValueChange={(val) => {
                                         const dept = departments.find(d => d.id.toString() === val);
-                                        setData({ ...data, department_id: val ? Number(val) : '', department: dept?.name || data.department });
+                                        setData(prev => ({ ...prev, department_id: val ? Number(val) : '', department: dept?.name || prev.department }));
                                     }}>
-                                        <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
-                                        <SelectContent>
+                                        <SelectTrigger className="rounded-xl border-border bg-muted/20"><SelectValue placeholder="Select department" /></SelectTrigger>
+                                        <SelectContent className="rounded-xl">
                                             {departments.map(d => <SelectItem key={d.id} value={d.id.toString()}>{d.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Position</Label>
-                                    <Input value={data.position} onChange={e => setData('position', e.target.value)} placeholder="e.g. Senior Analyst" />
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1">Position / Title</Label>
+                                    <Input className="rounded-xl border-border bg-muted/20" value={data.position} onChange={e => setData('position', e.target.value)} placeholder="e.g. Senior HR Manager" />
                                 </div>
                             </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Salary Grade</Label>
-                                    <Input value={data.salary_grade} onChange={e => setData('salary_grade', e.target.value)} placeholder="e.g. SG-15" />
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1">Salary Grade</Label>
+                                    <Input className="rounded-xl border-border bg-muted/20" value={data.salary_grade} onChange={e => setData('salary_grade', e.target.value)} placeholder="e.g. SG-18" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Status</Label>
+                                    <Label className="text-xs font-bold text-muted-foreground ml-1">Account Employment Status</Label>
                                     <Select value={data.status} onValueChange={(val) => setData('status', val)}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                        <SelectTrigger className={`rounded-xl border-border h-10 overflow-hidden ${data.status === 'active' ? 'bg-emerald-50/50 text-emerald-600' : 'bg-red-50/50 text-red-600'}`}>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            <SelectItem value="active" className="text-emerald-600 font-bold italic uppercase tracking-tighter text-[10px]">Active Service</SelectItem>
+                                            <SelectItem value="inactive" className="text-red-600 font-bold italic uppercase tracking-tighter text-[10px]">Inactive / On Hold</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter className="gap-2 sm:gap-0">
-                            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-                            <Button type="submit" disabled={processing} className="bg-primary hover:bg-primary/90">{processing ? 'Saving...' : 'Save Changes'}</Button>
-                        </DialogFooter>
+
+                        <div className="p-6 bg-muted/10 border-t border-zinc-200 flex justify-end gap-3">
+                            <Button type="button" variant="outline" className="rounded-xl border-zinc-200 px-6" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={processing} className="rounded-xl bg-primary hover:bg-primary/90 px-10 shadow-lg shadow-primary/20 font-black uppercase tracking-widest text-[10px]">
+                                {processing ? 'Uploading...' : 'Save Changes'}
+                            </Button>
+                        </div>
                     </form>
                 </DialogContent>
             </Dialog>
