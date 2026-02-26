@@ -1,0 +1,51 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Employee;
+use App\Models\User;
+use App\Models\Department;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class EmployeeController extends Controller
+{
+    public function index()
+    {
+        $employees = Employee::with(['user.roles', 'departmentRelation'])->get();
+        $departments = Department::all();
+
+        return Inertia::render('admin/employees/index', [
+            'employees' => $employees,
+            'departments' => $departments,
+        ]);
+    }
+
+    public function update(Request $request, Employee $employee)
+    {
+        $request->validate([
+            'contact_number' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'join_date' => 'nullable|date',
+            'department' => 'nullable|string',
+            'department_id' => 'nullable|exists:departments,id',
+            'position' => 'nullable|string',
+            'salary_grade' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $employee->update($request->only([
+            'contact_number', 'address', 'join_date', 'department',
+            'department_id', 'position', 'salary_grade', 'status',
+        ]));
+
+        return redirect()->route('admin.employees.index')->with('success', 'Employee updated successfully.');
+    }
+
+    public function destroy(Employee $employee)
+    {
+        $employee->delete();
+        return redirect()->route('admin.employees.index')->with('success', 'Employee record deleted.');
+    }
+}

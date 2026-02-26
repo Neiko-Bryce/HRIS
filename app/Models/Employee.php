@@ -14,6 +14,7 @@ class Employee extends Model
         'address',
         'join_date',
         'department',
+        'department_id',
         'position',
         'salary_grade',
         'status',
@@ -22,5 +23,10 @@ class Employee extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function departmentRelation()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }

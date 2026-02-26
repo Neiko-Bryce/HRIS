@@ -7,9 +7,7 @@ import {
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarGroup,
-    SidebarGroupLabel
+    SidebarMenuItem
 } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -19,7 +17,13 @@ import {
     Users,
     Clock,
     CreditCard,
-    ClipboardList
+    ClipboardList,
+    Building2,
+    Briefcase,
+    KeyRound,
+    BarChart3,
+    Settings,
+    FileText,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
@@ -39,20 +43,30 @@ export function AppSidebar() {
     const hrNavItems: NavItem[] = [
         {
             title: 'Employee List',
-            url: '#',
+            url: '/admin/employees',
             icon: Users,
         },
         {
             title: 'Leave Management',
-            url: '#',
+            url: '/admin/leaves',
             icon: ClipboardList,
+        },
+        {
+            title: 'Recruitment',
+            url: '/admin/recruitment',
+            icon: Briefcase,
+        },
+        {
+            title: 'Document Management (EIS)',
+            url: '/admin/documents',
+            icon: FileText,
         },
     ];
 
     const attendanceNavItems: NavItem[] = [
         {
             title: 'Virtual DTR',
-            url: '#',
+            url: '/admin/attendance',
             icon: Clock,
         },
     ];
@@ -60,23 +74,45 @@ export function AppSidebar() {
     const payrollNavItems: NavItem[] = [
         {
             title: 'Payslips',
-            url: '#',
+            url: '/admin/payroll',
             icon: CreditCard,
         },
     ];
 
     const adminNavItems: NavItem[] = [];
     if (isSuperAdmin) {
-        adminNavItems.push({
-            title: 'User Management',
-            url: '/admin/users',
-            icon: ShieldCheck,
-        });
+        adminNavItems.push(
+            {
+                title: 'User Management',
+                url: '/admin/users',
+                icon: ShieldCheck,
+            },
+            {
+                title: 'Departments',
+                url: '/admin/departments',
+                icon: Building2,
+            },
+            {
+                title: 'Roles & Permissions',
+                url: '/admin/roles',
+                icon: KeyRound,
+            },
+            {
+                title: 'Reports & Analytics',
+                url: '/admin/reports',
+                icon: BarChart3,
+            },
+            {
+                title: 'System Settings',
+                url: '/admin/settings',
+                icon: Settings,
+            },
+        );
     }
 
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -92,29 +128,13 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} />
 
-                {isHR && (
-                    <SidebarGroup className="px-2 py-2">
-                        <SidebarGroupLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">HR Management</SidebarGroupLabel>
-                        <NavMain items={hrNavItems} />
-                    </SidebarGroup>
-                )}
+                {isHR && <NavMain items={hrNavItems} label="HR Management" />}
 
-                <SidebarGroup className="px-2 py-2">
-                    <SidebarGroupLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">Attendance</SidebarGroupLabel>
-                    <NavMain items={attendanceNavItems} />
-                </SidebarGroup>
+                <NavMain items={attendanceNavItems} label="Virtual DTR" />
 
-                <SidebarGroup className="px-2 py-2">
-                    <SidebarGroupLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">Payroll</SidebarGroupLabel>
-                    <NavMain items={payrollNavItems} />
-                </SidebarGroup>
+                <NavMain items={payrollNavItems} label="Payroll" />
 
-                {isSuperAdmin && (
-                    <SidebarGroup className="px-2 py-2">
-                        <SidebarGroupLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">Administration</SidebarGroupLabel>
-                        <NavMain items={adminNavItems} />
-                    </SidebarGroup>
-                )}
+                {isSuperAdmin && <NavMain items={adminNavItems} label="Administration" />}
             </SidebarContent>
 
             <SidebarFooter>

@@ -142,4 +142,12 @@
     --chart-4: #9CA3AF;
     --chart-5: #E5E7EB;
     --radius: 0.5rem;
+    --sidebar-background: #FFFFFF;
+    --sidebar-foreground: #111827;
+    --sidebar-primary: #1E3A8A;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F3F4F6;
+    --sidebar-accent-foreground: #111827;
+    --sidebar-border: #E5E7EB;
+    --sidebar-ring: #1E3A8A;
 }

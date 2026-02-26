@@ -6,8 +6,25 @@ interface AppLayoutProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
-export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
-    <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-        {children}
-    </AppLayoutTemplate>
-);
+import { useEffect } from 'react';
+import { usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
+
+export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
+    const { flash } = usePage<{ flash: { success: string | null; error: string | null } }>().props;
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
+    return (
+        <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+            {children}
+        </AppLayoutTemplate>
+    );
+};
