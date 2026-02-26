@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Artisan;
+use Inertia\Inertia;
 
 class SystemConfigController extends Controller
 {
@@ -18,7 +18,7 @@ class SystemConfigController extends Controller
                 'app_env' => config('app.env'),
                 'debug_mode' => config('app.debug'),
                 'maintenance_mode' => app()->isDownForMaintenance(),
-            ]
+            ],
         ]);
     }
 
@@ -30,7 +30,7 @@ class SystemConfigController extends Controller
 
         // In a real app, we'd update .env or a DB settings table.
         // For now, we'll simulate success.
-        
+
         return redirect()->back()->with('success', 'System settings updated (simulation).');
     }
 

@@ -34,7 +34,7 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
+            'name' => 'required|string|max:255|unique:departments,name,'.$department->id,
             'code' => 'nullable|string|max:10',
             'description' => 'nullable|string',
         ]);
@@ -51,6 +51,7 @@ class DepartmentController extends Controller
         }
 
         $department->delete();
+
         return redirect()->route('admin.departments.index')->with('success', 'Department deleted.');
     }
 }

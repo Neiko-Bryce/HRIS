@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class AttendanceController extends Controller
 {
@@ -18,7 +18,7 @@ class AttendanceController extends Controller
         $users = User::role(['HR Administrator', 'Head Employee', 'Employee'])
             ->with('employee.departmentRelation')
             ->get();
-        
+
         $attendances = \App\Models\Attendance::with('user.employee')->latest()->get();
 
         return Inertia::render('admin/attendance/index', [
@@ -53,13 +53,14 @@ class AttendanceController extends Controller
             ->whereDate('date', $today)
             ->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             \App\Models\Attendance::create([
                 'user_id' => $user->id,
                 'date' => $today,
                 'check_in' => $now,
                 'status' => 'present',
             ]);
+
             return redirect()->back()->with('success', 'Checked in successfully.');
         }
 
@@ -98,7 +99,7 @@ class AttendanceController extends Controller
             if ($timeOut) {
                 // Difference in hours
                 $hoursWorked = round($timeOut->diffInMinutes($timeIn) / 60, 2);
-                
+
                 if ($hoursWorked < 4) {
                     $status = 'half-day';
                 } elseif ($timeOut->format('H:i') < '17:00' && $status !== 'late') {
@@ -164,6 +165,7 @@ class AttendanceController extends Controller
     public function destroy(Attendance $attendance)
     {
         $attendance->delete();
+
         return redirect()->route('admin.attendance.index')->with('success', 'Attendance record deleted.');
     }
 }

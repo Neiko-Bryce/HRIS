@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Employee;
-use App\Models\User;
 use App\Models\Department;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -46,6 +45,7 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         $employee->delete();
+
         return redirect()->route('admin.employees.index')->with('success', 'Employee record deleted.');
     }
 }

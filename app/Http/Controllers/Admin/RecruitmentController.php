@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\JobPosting;
 use App\Models\Applicant;
 use App\Models\Department;
+use App\Models\JobPosting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -136,7 +136,7 @@ class RecruitmentController extends Controller
             // 3. Update Applicant
             $applicant->update([
                 'status' => 'hired',
-                'notes' => ($applicant->notes ? $applicant->notes . "\n" : "") . "Hired as " . $request->position . " on " . now()->toDateString(),
+                'notes' => ($applicant->notes ? $applicant->notes."\n" : '').'Hired as '.$request->position.' on '.now()->toDateString(),
             ]);
         });
 
@@ -147,6 +147,7 @@ class RecruitmentController extends Controller
     {
         $jobPosting = JobPosting::findOrFail($id);
         $jobPosting->delete();
+
         return redirect()->route('admin.recruitment.index')->with('success', 'Job posting deleted.');
     }
 }

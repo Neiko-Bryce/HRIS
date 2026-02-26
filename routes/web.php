@@ -1,18 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\LeaveController;
 use App\Http\Controllers\Admin\PayrollController;
-use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\RecruitmentController;
+use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SystemConfigController;
-use App\Http\Controllers\Admin\DocumentController;
-use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\UserController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -51,4 +51,3 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
-

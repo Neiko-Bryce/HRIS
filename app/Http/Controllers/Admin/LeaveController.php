@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -87,6 +87,7 @@ class LeaveController extends Controller
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+
         return redirect()->back()->with('success', 'Department head approval recorded.');
     }
 
@@ -97,12 +98,14 @@ class LeaveController extends Controller
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+
         return redirect()->back()->with('success', 'Leave fully approved by HR.');
     }
 
     public function destroy(LeaveRequest $leaf)
     {
         $leaf->delete();
+
         return redirect()->route('admin.leaves.index')->with('success', 'Leave request deleted.');
     }
 }

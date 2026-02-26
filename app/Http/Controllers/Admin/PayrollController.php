@@ -77,7 +77,7 @@ class PayrollController extends Controller
             'remarks' => $request->remarks,
         ]);
 
-        return redirect()->route('admin.payroll.index')->with('success', 'Payslip created' . ($request->auto_calc ? ' with auto-calculated contributions.' : '.'));
+        return redirect()->route('admin.payroll.index')->with('success', 'Payslip created'.($request->auto_calc ? ' with auto-calculated contributions.' : '.'));
     }
 
     public function update(Request $request, Payslip $payroll)
@@ -130,6 +130,7 @@ class PayrollController extends Controller
     public function destroy(Payslip $payroll)
     {
         $payroll->delete();
+
         return redirect()->route('admin.payroll.index')->with('success', 'Payslip deleted.');
     }
 }

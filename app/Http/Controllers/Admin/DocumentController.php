@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class DocumentController extends Controller
 {
@@ -72,14 +72,15 @@ class DocumentController extends Controller
     public function download(Document $document)
     {
         $extension = pathinfo($document->file_path, PATHINFO_EXTENSION);
-        return Storage::disk('public')->download($document->file_path, $document->title . '.' . $extension);
+
+        return Storage::disk('public')->download($document->file_path, $document->title.'.'.$extension);
     }
 
     public function downloadAll($userId)
     {
         $user = User::findOrFail($userId);
         $documents = Document::where('user_id', $userId)->get();
-        
+
         if ($documents->isEmpty()) {
             return redirect()->back()->with('error', 'No documents found for this employee.');
         }
@@ -90,11 +91,11 @@ class DocumentController extends Controller
             'date' => now()->format('F d, Y'),
         ]);
 
-        $zip = new \ZipArchive();
-        $zipFileName = 'Employee_Documents_' . str_replace(' ', '_', $user->name) . '_' . now()->format('Ymd') . '.zip';
-        $zipPath = storage_path('app/public/' . $zipFileName);
+        $zip = new \ZipArchive;
+        $zipFileName = 'Employee_Documents_'.str_replace(' ', '_', $user->name).'_'.now()->format('Ymd').'.zip';
+        $zipPath = storage_path('app/public/'.$zipFileName);
 
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
             // Add Inventory PDF
             $zip->addFromString('Document_Inventory.pdf', $pdf->output());
 
@@ -103,7 +104,7 @@ class DocumentController extends Controller
                 $filePath = Storage::disk('public')->path($doc->file_path);
                 if (file_exists($filePath)) {
                     $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-                    $zip->addFile($filePath, $doc->type . '/' . $doc->title . '.' . $extension);
+                    $zip->addFile($filePath, $doc->type.'/'.$doc->title.'.'.$extension);
                 }
             }
             $zip->close();
