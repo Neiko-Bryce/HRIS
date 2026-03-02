@@ -2,6 +2,7 @@ import React from 'react';
 import { Head } from '@inertiajs/react';
 import { BadgeCheck, Calendar, Clock, FileText, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 
 function StatCard({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) {
     return (

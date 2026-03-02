@@ -29,15 +29,32 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->only(['name', 'email']));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return to_route('profile.edit');
+        // Update employee details
+        if ($user->employee) {
+            $employeeData = $request->only(['contact_number', 'address']);
+
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
+                if ($user->employee->photo_path) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->employee->photo_path);
+                }
+                $path = $request->file('photo')->store('profile-photos', 'public');
+                $employeeData['photo_path'] = $path;
+            }
+
+            $user->employee->update($employeeData);
+        }
+
+        return to_route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**

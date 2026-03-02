@@ -19,15 +19,15 @@ export function NavMain({ items = [], label }: { items: NavItem[]; label?: strin
                                 className={cn(
                                     'relative transition-all duration-200 min-h-10 h-auto px-3 w-full',
                                     isActive
-                                        ? '!bg-zinc-900 !text-white shadow-lg hover:!bg-zinc-800 rounded-xl'
-                                        : 'hover:bg-zinc-100 text-zinc-600'
+                                        ? '!bg-foreground !text-background shadow-lg shadow-foreground/5 rounded-xl'
+                                        : 'hover:bg-muted text-muted-foreground hover:text-foreground'
                                 )}
                             >
                                 <Link href={item.url} prefetch className="flex items-center gap-3 w-full py-2">
                                     {isActive && (
-                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-background rounded-r-full" />
                                     )}
-                                    {item.icon && <item.icon className={cn("size-5 shrink-0", isActive ? "!text-white" : "text-zinc-500")} />}
+                                    {item.icon && <item.icon className={cn("size-5 shrink-0", isActive ? "!text-background" : "text-muted-foreground group-hover:text-foreground")} />}
                                     <span className={cn("text-sm tracking-tight truncate", isActive ? "font-bold" : "font-semibold")}>
                                         {item.title}
                                     </span>

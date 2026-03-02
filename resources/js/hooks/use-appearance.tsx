@@ -3,19 +3,22 @@ import { useCallback, useEffect, useState } from 'react';
 export type Appearance = 'light' | 'dark' | 'system';
 
 
-const applyTheme = () => {
-    // Force light mode regardless of preference
-    document.documentElement.classList.remove('dark');
+const applyTheme = (appearance: Appearance) => {
+    const isDark = appearance === 'dark' || (appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    document.documentElement.classList.toggle('dark', isDark);
 };
 
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 const handleSystemThemeChange = () => {
-    applyTheme();
+    const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
+    applyTheme(savedAppearance || 'system');
 };
 
 export function initializeTheme() {
-    applyTheme();
+    const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
+    applyTheme(savedAppearance || 'system');
 
     // Add the event listener for system theme changes...
     mediaQuery.addEventListener('change', handleSystemThemeChange);
@@ -27,7 +30,7 @@ export function useAppearance() {
     const updateAppearance = useCallback((mode: Appearance) => {
         setAppearance(mode);
         localStorage.setItem('appearance', mode);
-        applyTheme();
+        applyTheme(mode);
     }, []);
 
     useEffect(() => {

@@ -48,17 +48,7 @@ createInertiaApp({
     },
 });
 
-const applyTheme = () => {
-    // Force light mode regardless of preference
-    document.documentElement.classList.remove('dark');
-};
-
-const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-const handleSystemThemeChange = () => {
-    applyTheme();
-};
+import { initializeTheme } from '@/hooks/use-appearance';
 
 // This will set light / dark mode on load...
-applyTheme();
-mediaQuery.addEventListener('change', handleSystemThemeChange);
+initializeTheme();

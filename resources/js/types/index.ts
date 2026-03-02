@@ -38,10 +38,12 @@ export interface User {
     employee?: {
         id: number;
         employee_id: string;
+        contact_number: string | null;
+        address: string | null;
         position: string | null;
         department_id: number | null;
+        department_name: string | null;
         photo_path: string | null;
-        department_relation?: { name: string } | null;
     };
     permissions?: string[];
     email_verified_at: string | null;

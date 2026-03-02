@@ -7,8 +7,8 @@ export default function AppLogo() {
                 <AppLogoIcon className="size-6 fill-current" />
             </div>
             <div className="grid flex-1 text-left group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-lg font-black tracking-tighter text-zinc-900 leading-none">HRIS</span>
-                <span className="truncate text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] mt-1 opacity-70">Enterprise</span>
+                <span className="truncate text-lg font-black tracking-tighter text-foreground leading-none">HRIS</span>
+                <span className="truncate text-[10px] text-muted-foreground/80 dark:text-zinc-400 font-black uppercase tracking-[0.2em] mt-1">Enterprise</span>
             </div>
         </div>
     );

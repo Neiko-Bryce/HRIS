@@ -173,7 +173,7 @@ const Sidebar = React.forwardRef<
                     side={side}
                 >
                     <SheetTitle className="sr-only">Sidebar Navigation</SheetTitle>
-                    <div className="flex h-full w-full flex-col">{children}</div>
+                    <div className="flex h-full w-full flex-col overflow-y-auto">{children}</div>
                 </SheetContent>
             </Sheet>
         );
@@ -215,7 +215,7 @@ const Sidebar = React.forwardRef<
             >
                 <div
                     data-sidebar="sidebar"
-                    className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+                    className="flex h-full w-full flex-col overflow-y-auto bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
                 >
                     {children}
                 </div>
@@ -479,7 +479,7 @@ const SidebarMenuAction = React.forwardRef<
                 'peer-data-[size=lg]/menu-button:top-2.5',
                 'group-data-[collapsible=icon]:hidden',
                 showOnHover &&
-                    'group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0',
+                'group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0',
                 className,
             )}
             {...props}
