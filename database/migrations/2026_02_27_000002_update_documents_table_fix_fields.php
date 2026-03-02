@@ -9,9 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            $table->renameColumn('name', 'title');
-            $table->date('expiry_date')->nullable()->after('file_path');
-            $table->text('notes')->nullable()->after('expiry_date');
+            if (Schema::hasColumn('documents', 'name')) {
+                $table->renameColumn('name', 'title');
+            }
+            if (! Schema::hasColumn('documents', 'expiry_date')) {
+                $table->date('expiry_date')->nullable()->after('file_path');
+            }
+            if (! Schema::hasColumn('documents', 'notes')) {
+                $table->text('notes')->nullable()->after('expiry_date');
+            }
         });
     }
 

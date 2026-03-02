@@ -123,8 +123,8 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                 </div>
 
                 {/* Search & Actions */}
-                <div className="mb-6">
-                    <div className="relative w-full">
+                <div className="mb-6 flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                         <input
                             type="text"
@@ -134,6 +134,17 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                             className="w-full bg-card border border-border rounded-xl pl-10 h-10 md:h-12 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm"
                         />
                     </div>
+                    <Select onValueChange={(val) => {
+                        // Using search state as a proxy for filtering or adding a dedicated state
+                        if (val === 'all') setSearch('');
+                        else setSearch(val);
+                    }}>
+                        <SelectTrigger className="w-full md:w-64 h-10 md:h-12 rounded-xl bg-card border-border"><SelectValue placeholder="All Departments" /></SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                            <SelectItem value="all">All Departments</SelectItem>
+                            {departments.map(d => <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 {/* Desktop Table / Mobile Cards */}
@@ -161,8 +172,8 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 border-t border-zinc-100 pt-4">
                                     <div>
-                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-1">Department</p>
-                                        <p className="text-sm font-semibold text-zinc-700">{emp.department_relation?.name || emp.department || '--'}</p>
+                                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-1">Role</p>
+                                        <p className="text-sm font-semibold text-zinc-700">{emp.user.roles?.[0]?.name || 'Employee'}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-1">Position</p>
@@ -187,48 +198,72 @@ export default function EmployeeIndex({ employees, departments }: { employees: E
                                 <thead>
                                     <tr className="bg-muted/50">
                                         <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Employee</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Department</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Role</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Position</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
                                         <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-border">
-                                    {filtered.map((emp) => (
-                                        <tr key={emp.id} className="hover:bg-primary/[0.02] transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border overflow-hidden">
-                                                        {emp.photo_path ? (
-                                                            <img src={`/storage/${emp.photo_path}`} className="w-full h-full object-cover" alt={emp.user.name} />
-                                                        ) : (
-                                                            emp.user.name.charAt(0)
-                                                        )}
+                                <tbody className="divide-y divide-border text-sm">
+                                    {Object.entries(
+                                        filtered.reduce((acc, emp) => {
+                                            const dept = emp.department_relation?.name || emp.department || 'Unassigned';
+                                            if (!acc[dept]) acc[dept] = [];
+                                            acc[dept].push(emp);
+                                            return acc;
+                                        }, {} as Record<string, Employee[]>)
+                                    ).map(([dept, deptEmployees]) => (
+                                        <React.Fragment key={dept}>
+                                            <tr className="bg-muted/30">
+                                                <td colSpan={4} className="px-6 py-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <Briefcase size={14} className="text-primary/60" />
+                                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{dept}</span>
+                                                        <span className="text-[10px] font-bold text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">{deptEmployees.length}</span>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-bold text-foreground leading-none mb-1">{emp.user.name}</p>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[11px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{emp.employee_id}</span>
-                                                            <span className="text-[11px] text-muted-foreground/60">{emp.user.email}</span>
+                                                </td>
+                                            </tr>
+                                            {deptEmployees.map((emp) => (
+                                                <tr key={emp.id} className="hover:bg-primary/[0.02] transition-colors group">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center font-black text-primary border border-border overflow-hidden">
+                                                                {emp.photo_path ? (
+                                                                    <img src={`/storage/${emp.photo_path}`} className="w-full h-full object-cover" alt={emp.user.name} />
+                                                                ) : (
+                                                                    emp.user.name.charAt(0)
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-foreground leading-none mb-1">{emp.user.name}</p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[11px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{emp.employee_id}</span>
+                                                                    <span className="text-[11px] text-muted-foreground/60">{emp.user.email}</span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-foreground/80">{emp.department_relation?.name || emp.department || '--'}</td>
-                                            <td className="px-6 py-4 text-sm font-medium text-foreground/80">{emp.position || '--'}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-1.5">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${emp.status === 'active' ? 'bg-green-500 font-black' : 'bg-red-500'}`} />
-                                                    <span className={`text-[10px] font-black uppercase tracking-widest ${emp.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>{emp.status}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5" onClick={() => openEdit(emp)}><Edit2 size={14} /></Button>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => { setCurrent(emp); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="text-[10px] font-black uppercase text-secondary-foreground bg-secondary/80 px-2 py-1 rounded tracking-widest">
+                                                            {emp.user.roles?.[0]?.name || 'Employee'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 font-medium text-foreground/80">{emp.position || '--'}</td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${emp.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`} />
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest ${emp.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>{emp.status}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5" onClick={() => openEdit(emp)}><Edit2 size={14} /></Button>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5" onClick={() => { setCurrent(emp); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
                                     ))}
                                 </tbody>
                             </table>

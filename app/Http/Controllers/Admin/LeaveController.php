@@ -14,12 +14,32 @@ class LeaveController extends Controller
 {
     public function index()
     {
-        $leaves = LeaveRequest::with(['user.employee', 'reviewer'])->latest()->get();
-        $users = User::with('employee')->get();
+        $user = Auth::user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+        $isHead = $user->hasRole('Head Employee');
+
+        $leavesQuery = LeaveRequest::with(['user.employee.departmentRelation', 'reviewer'])->latest();
+        $usersQuery = User::with('employee');
+
+        if (($isHead || $isHR) && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $usersQuery->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+                $leavesQuery->whereHas('user.employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            } else {
+                $usersQuery->where('id', '<', 0);
+                $leavesQuery->where('id', '<', 0);
+            }
+        }
 
         return Inertia::render('admin/leaves/index', [
-            'leaves' => $leaves,
-            'users' => $users,
+            'leaves' => $leavesQuery->get(),
+            'users' => $usersQuery->get(),
         ]);
     }
 

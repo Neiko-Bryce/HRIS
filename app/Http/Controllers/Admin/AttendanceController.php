@@ -14,17 +14,40 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        // Filter out users with 'Super Administrator' role
-        $users = User::role(['HR Administrator', 'Head Employee', 'Employee'])
-            ->with('employee.departmentRelation')
-            ->get();
+        $user = Auth::user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+        $isHead = $user->hasRole('Head Employee');
 
-        $attendances = \App\Models\Attendance::with('user.employee')->latest()->get();
+        $usersQuery = User::role(['HR Administrator', 'Head Employee', 'Employee'])
+            ->with('employee.departmentRelation');
+
+        $attendanceQuery = \App\Models\Attendance::with('user.employee')->latest();
+
+        if (($isHead || $isHR) && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $usersQuery->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+                $attendanceQuery->whereHas('user.employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            } else {
+                $usersQuery->where('id', '<', 0);
+                $attendanceQuery->where('id', '<', 0);
+            }
+        }
 
         return Inertia::render('admin/attendance/index', [
-            'attendances' => $attendances,
-            'users' => $users,
+            'attendances' => $attendanceQuery->get(),
+            'users' => $usersQuery->get(),
         ]);
+    }
+
+    public function qrTerminal()
+    {
+        return Inertia::render('admin/attendance/qr-terminal');
     }
 
     public function check()
@@ -49,30 +72,54 @@ class AttendanceController extends Controller
         $today = now()->toDateString();
         $now = now()->toTimeString();
 
+        $shiftStartTime = \App\Models\Setting::where('key', 'shift_start_time')->value('value') ?? '08:00';
+        $shiftEndTime = \App\Models\Setting::where('key', 'shift_end_time')->value('value') ?? '17:00';
+
         $attendance = \App\Models\Attendance::where('user_id', $user->id)
             ->whereDate('date', $today)
             ->first();
 
         if (! $attendance) {
+            // Check if late
+            $status = 'present';
+            // Simple string comparison works for H:i:s and H:i
+            if (substr($now, 0, 5) > $shiftStartTime) {
+                $status = 'late';
+            }
+
             \App\Models\Attendance::create([
                 'user_id' => $user->id,
                 'date' => $today,
-                'check_in' => $now,
-                'status' => 'present',
+                'time_in' => $now,
+                'status' => $status,
             ]);
 
             return redirect()->back()->with('success', 'Checked in successfully.');
         }
 
-        if ($attendance->check_out) {
+        if ($attendance->time_out) {
             return redirect()->back()->with('error', 'You have already checked out for today.');
         }
 
+        // Calculate checkout status (undertime, half-day)
+        $timeIn = Carbon::createFromFormat('H:i:s', $attendance->time_in);
+        $timeOut = Carbon::createFromFormat('H:i:s', $now);
+        $hoursWorked = round($timeOut->diffInMinutes($timeIn) / 60, 2);
+
+        $status = $attendance->status;
+        if ($hoursWorked < 4) {
+            $status = 'half-day';
+        } elseif (substr($now, 0, 5) < $shiftEndTime && $status !== 'late') {
+            $status = 'undertime';
+        }
+
         $attendance->update([
-            'check_out' => $now,
+            'time_out' => $now,
+            'hours_worked' => $hoursWorked,
+            'status' => $status,
         ]);
 
-        return redirect()->back()->with('success', 'Checked out successfully.');
+        return redirect()->back()->with('success', 'Checked out successfully. Status: '.$status);
     }
 
     public function store(Request $request)
@@ -90,9 +137,12 @@ class AttendanceController extends Controller
         $hoursWorked = 0;
         $status = 'absent';
 
+        $shiftStartTime = \App\Models\Setting::where('key', 'shift_start_time')->value('value') ?? '08:00';
+        $shiftEndTime = \App\Models\Setting::where('key', 'shift_end_time')->value('value') ?? '17:00';
+
         if ($timeIn) {
             $status = 'present';
-            if ($timeIn->format('H:i') > '08:00') {
+            if ($timeIn->format('H:i') > $shiftStartTime) {
                 $status = 'late';
             }
 
@@ -102,7 +152,7 @@ class AttendanceController extends Controller
 
                 if ($hoursWorked < 4) {
                     $status = 'half-day';
-                } elseif ($timeOut->format('H:i') < '17:00' && $status !== 'late') {
+                } elseif ($timeOut->format('H:i') < $shiftEndTime && $status !== 'late') {
                     $status = 'undertime';
                 }
             }
@@ -135,9 +185,12 @@ class AttendanceController extends Controller
         $hoursWorked = 0;
         $status = 'absent';
 
+        $shiftStartTime = \App\Models\Setting::where('key', 'shift_start_time')->value('value') ?? '08:00';
+        $shiftEndTime = \App\Models\Setting::where('key', 'shift_end_time')->value('value') ?? '17:00';
+
         if ($timeIn) {
             $status = 'present';
-            if ($timeIn->format('H:i') > '08:00') {
+            if ($timeIn->format('H:i') > $shiftStartTime) {
                 $status = 'late';
             }
 
@@ -145,7 +198,7 @@ class AttendanceController extends Controller
                 $hoursWorked = round($timeOut->diffInMinutes($timeIn) / 60, 2);
                 if ($hoursWorked < 4) {
                     $status = 'half-day';
-                } elseif ($timeOut->format('H:i') < '17:00' && $status !== 'late') {
+                } elseif ($timeOut->format('H:i') < $shiftEndTime && $status !== 'late') {
                     $status = 'undertime';
                 }
             }

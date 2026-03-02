@@ -88,7 +88,7 @@ export default function Hero() {
                             <div className="absolute -inset-10 bg-gradient-to-tr from-primary/10 to-accent/10 rounded-[3rem] blur-3xl opacity-50 group-hover:opacity-80 transition-opacity duration-1000" />
 
                             {/* The Main Mockup Frame */}
-                            <div className="relative glass-morphism rounded-[2.5rem] p-3 shadow-2xl border border-white/40 overflow-hidden group-hover:shadow-primary/10 transition-shadow duration-500">
+                            <div className="relative glass-morphism rounded-[2.5rem] p-3 shadow-2xl border border-white/40 group-hover:shadow-primary/10 transition-shadow duration-500">
                                 <div className="bg-white/50 backdrop-blur-md rounded-[1.8rem] overflow-hidden border border-white/60 min-h-[500px] flex flex-col shadow-inner">
                                     {/* Mock Header */}
                                     <div className="h-16 border-b border-zinc-200/50 bg-white/40 px-6 flex items-center justify-between">

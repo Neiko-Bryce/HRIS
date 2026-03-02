@@ -12,12 +12,31 @@ class PayrollController extends Controller
 {
     public function index()
     {
-        $payslips = Payslip::with(['user.employee'])->latest()->get();
-        $users = User::with('employee')->get();
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+
+        $payslipQuery = Payslip::with(['user.employee'])->latest();
+        $userQuery = User::with('employee');
+
+        if ($isHR && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $payslipQuery->whereHas('user.employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+                $userQuery->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            } else {
+                $payslipQuery->where('id', -1);
+                $userQuery->where('id', -1);
+            }
+        }
 
         return Inertia::render('admin/payroll/index', [
-            'payslips' => $payslips,
-            'users' => $users,
+            'payslips' => $payslipQuery->get(),
+            'users' => $userQuery->get(),
         ]);
     }
 

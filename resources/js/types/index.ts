@@ -34,6 +34,15 @@ export interface User {
     email: string;
     avatar?: string;
     roles?: string[];
+    primary_role?: string;
+    employee?: {
+        id: number;
+        employee_id: string;
+        position: string | null;
+        department_id: number | null;
+        photo_path: string | null;
+        department_relation?: { name: string } | null;
+    };
     permissions?: string[];
     email_verified_at: string | null;
     created_at: string;

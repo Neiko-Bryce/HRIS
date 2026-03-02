@@ -22,7 +22,13 @@ interface LeaveReq {
     reason: string;
     status: string;
     reviewed_by: number | null;
-    user: { id: number; name: string; email: string; employee?: { employee_id: string } };
+    user: {
+        id: number; name: string; email: string; employee?: {
+            employee_id: string;
+            department: string | null;
+            department_relation?: { name: string } | null;
+        }
+    };
     reviewer?: { name: string } | null;
 }
 
@@ -194,36 +200,60 @@ export default function LeaveIndex({ leaves, users }: { leaves: LeaveReq[]; user
                     <div className="hidden md:block bg-card border border-border rounded-xl shadow-sm overflow-hidden text-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
-                                <thead><tr className="bg-muted/50">
-                                    {['Employee', 'Type', 'Dates', 'Days', 'Status', 'Actions'].map(h => (
-                                        <th key={h} className={`px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] ${h === 'Actions' ? 'text-right' : ''}`}>{h}</th>
-                                    ))}
-                                </tr></thead>
+                                <thead>
+                                    <tr className="bg-muted/50">
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Employee</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Type</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Dates</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Days</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] text-right">Actions</th>
+                                    </tr>
+                                </thead>
                                 <tbody className="divide-y divide-border">
-                                    {filtered.map(l => (
-                                        <tr key={l.id} className="hover:bg-primary/[0.02] transition-colors">
-                                            <td className="px-6 py-4">
-                                                <p className="font-bold text-foreground leading-none mb-1">{l.user.name}</p>
-                                                <p className="text-[11px] text-muted-foreground">{l.user.employee?.employee_id || l.user.email}</p>
-                                            </td>
-                                            <td className="px-6 py-4"><span className="text-[10px] font-black uppercase bg-muted px-2 py-1 rounded tracking-wider">{l.type}</span></td>
-                                            <td className="px-6 py-4 text-xs font-medium">{new Date(l.start_date).toLocaleDateString()} — {new Date(l.end_date).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 font-bold">{l.total_days}</td>
-                                            <td className="px-6 py-4"><span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-md border ${statusStyles[l.status]}`}>{l.status.replace('_', ' ')}</span></td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-1">
-                                                    {l.status === 'pending' && <>
-                                                        <Button size="sm" variant="ghost" className="text-blue-600 hover:bg-blue-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'head')}><CheckCircle size={14} className="mr-1" />Head Approve</Button>
-                                                        <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'deny', 'denied')}><XCircle size={14} className="mr-1" />Deny</Button>
-                                                    </>}
-                                                    {l.status === 'head_approved' && <>
-                                                        <Button size="sm" variant="ghost" className="text-green-600 hover:bg-green-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'hr')}><CheckCircle size={14} className="mr-1" />HR Approve</Button>
-                                                        <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'deny', 'denied')}><XCircle size={14} className="mr-1" />Deny</Button>
-                                                    </>}
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => { setCurrent(l); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                    {Object.entries(
+                                        filtered.reduce((acc, l) => {
+                                            const dept = l.user.employee?.department_relation?.name || l.user.employee?.department || 'Unassigned';
+                                            if (!acc[dept]) acc[dept] = [];
+                                            acc[dept].push(l);
+                                            return acc;
+                                        }, {} as Record<string, LeaveReq[]>)
+                                    ).map(([dept, deptLeaves]) => (
+                                        <React.Fragment key={dept}>
+                                            <tr className="bg-muted/30">
+                                                <td colSpan={6} className="px-6 py-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{dept}</span>
+                                                        <span className="text-[10px] font-bold text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">{deptLeaves.length}</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {deptLeaves.map(l => (
+                                                <tr key={l.id} className="hover:bg-primary/[0.02] transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <p className="font-bold text-foreground leading-none mb-1">{l.user.name}</p>
+                                                        <p className="text-[11px] text-muted-foreground">{l.user.employee?.employee_id || l.user.email}</p>
+                                                    </td>
+                                                    <td className="px-6 py-4"><span className="text-[10px] font-black uppercase bg-muted px-2 py-1 rounded tracking-wider">{l.type}</span></td>
+                                                    <td className="px-6 py-4 text-xs font-medium">{new Date(l.start_date).toLocaleDateString()} — {new Date(l.end_date).toLocaleDateString()}</td>
+                                                    <td className="px-6 py-4 font-bold">{l.total_days}</td>
+                                                    <td className="px-6 py-4"><span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-md border ${statusStyles[l.status]}`}>{l.status.replace('_', ' ')}</span></td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex justify-end gap-1">
+                                                            {l.status === 'pending' && <>
+                                                                <Button size="sm" variant="ghost" className="text-blue-600 hover:bg-blue-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'head')}><CheckCircle size={14} className="mr-1" />Head Approve</Button>
+                                                                <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'deny', 'denied')}><XCircle size={14} className="mr-1" />Deny</Button>
+                                                            </>}
+                                                            {l.status === 'head_approved' && <>
+                                                                <Button size="sm" variant="ghost" className="text-green-600 hover:bg-green-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'hr')}><CheckCircle size={14} className="mr-1" />HR Approve</Button>
+                                                                <Button size="sm" variant="ghost" className="text-red-600 hover:bg-red-50 text-[10px] font-black uppercase tracking-wider h-8" onClick={() => openConfirm(l.id, 'deny', 'denied')}><XCircle size={14} className="mr-1" />Deny</Button>
+                                                            </>}
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => { setCurrent(l); setIsDeleteOpen(true); }}><Trash2 size={14} /></Button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </React.Fragment>
                                     ))}
                                 </tbody>
                             </table>

@@ -11,6 +11,9 @@ class SystemConfigController extends Controller
 {
     public function index()
     {
+        $shiftStartTime = \App\Models\Setting::where('key', 'shift_start_time')->value('value') ?? '08:00';
+        $shiftEndTime = \App\Models\Setting::where('key', 'shift_end_time')->value('value') ?? '17:00';
+
         return Inertia::render('admin/settings/index', [
             'config' => [
                 'app_name' => config('app.name'),
@@ -18,6 +21,8 @@ class SystemConfigController extends Controller
                 'app_env' => config('app.env'),
                 'debug_mode' => config('app.debug'),
                 'maintenance_mode' => app()->isDownForMaintenance(),
+                'shift_start_time' => $shiftStartTime,
+                'shift_end_time' => $shiftEndTime,
             ],
         ]);
     }
@@ -26,12 +31,21 @@ class SystemConfigController extends Controller
     {
         $request->validate([
             'app_name' => 'required|string|max:255',
+            'shift_start_time' => 'required|date_format:H:i',
+            'shift_end_time' => 'required|date_format:H:i',
         ]);
 
-        // In a real app, we'd update .env or a DB settings table.
-        // For now, we'll simulate success.
+        \App\Models\Setting::updateOrCreate(
+            ['key' => 'shift_start_time'],
+            ['value' => $request->shift_start_time]
+        );
 
-        return redirect()->back()->with('success', 'System settings updated (simulation).');
+        \App\Models\Setting::updateOrCreate(
+            ['key' => 'shift_end_time'],
+            ['value' => $request->shift_end_time]
+        );
+
+        return redirect()->back()->with('success', 'System settings updated successfully.');
     }
 
     public function toggleMaintenance(Request $request)

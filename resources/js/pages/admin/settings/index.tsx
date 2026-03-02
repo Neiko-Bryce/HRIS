@@ -1,5 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
-import { Settings as SettingsIcon, Save, Power, ShieldAlert, Globe, Server } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Power, ShieldAlert, Globe, Server, Clock } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,11 +13,15 @@ interface Config {
     app_env: string;
     debug_mode: boolean;
     maintenance_mode: boolean;
+    shift_start_time: string;
+    shift_end_time: string;
 }
 
 export default function SettingsIndex({ config }: { config: Config }) {
     const { data, setData, put, processing } = useForm({
         app_name: config.app_name,
+        shift_start_time: config.shift_start_time,
+        shift_end_time: config.shift_end_time,
     });
 
     const submit = (e: React.FormEvent) => {
@@ -55,6 +59,16 @@ export default function SettingsIndex({ config }: { config: Config }) {
                                     <div className="space-y-2 opacity-70">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 font-mono"><Globe size={10} /> Base URL</Label>
                                         <Input className="rounded-xl bg-muted/50 font-mono text-xs h-11" value={config.app_url} disabled />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="shift_start_time" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5"><Clock size={10} /> Shift Start Time</Label>
+                                        <Input id="shift_start_time" type="time" className="rounded-xl h-11" value={data.shift_start_time} onChange={e => setData('shift_start_time', e.target.value)} required />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="shift_end_time" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5"><Clock size={10} /> Shift End Time</Label>
+                                        <Input id="shift_end_time" type="time" className="rounded-xl h-11" value={data.shift_end_time} onChange={e => setData('shift_end_time', e.target.value)} required />
                                     </div>
                                 </div>
                             </div>

@@ -13,12 +13,31 @@ class DocumentController extends Controller
 {
     public function index()
     {
-        $documents = Document::with('user')->latest()->get();
-        $users = User::all();
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+
+        $documentQuery = Document::with('user')->latest();
+        $userQuery = User::with('employee');
+
+        if ($isHR && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $documentQuery->whereHas('user.employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+                $userQuery->whereHas('employee', function ($q) use ($departmentId) {
+                    $q->where('department_id', $departmentId);
+                });
+            } else {
+                $documentQuery->where('id', -1);
+                $userQuery->where('id', -1);
+            }
+        }
 
         return Inertia::render('admin/documents/index', [
-            'documents' => $documents,
-            'users' => $users,
+            'documents' => $documentQuery->get(),
+            'users' => $userQuery->get(),
         ]);
     }
 

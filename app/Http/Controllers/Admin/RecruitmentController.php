@@ -13,11 +13,24 @@ class RecruitmentController extends Controller
 {
     public function index()
     {
-        $jobPostings = JobPosting::with(['department', 'applicants'])->latest()->get();
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+
+        $jobPostingQuery = JobPosting::with(['department', 'applicants'])->latest();
         $departments = Department::all();
 
+        if ($isHR && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $jobPostingQuery->where('department_id', $departmentId);
+            } else {
+                $jobPostingQuery->where('id', -1);
+            }
+        }
+
         return Inertia::render('admin/recruitment/index', [
-            'jobPostings' => $jobPostings,
+            'jobPostings' => $jobPostingQuery->get(),
             'departments' => $departments,
         ]);
     }

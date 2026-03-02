@@ -12,7 +12,22 @@ class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = Employee::with(['user.roles', 'departmentRelation'])->get();
+        $user = auth()->user();
+        $isSuperAdmin = $user->hasRole('Super Administrator');
+        $isHR = $user->hasRole('HR Administrator');
+
+        $query = Employee::with(['user.roles', 'departmentRelation']);
+
+        if ($isHR && ! $isSuperAdmin) {
+            $departmentId = $user->employee->department_id ?? null;
+            if ($departmentId) {
+                $query->where('department_id', $departmentId);
+            } else {
+                $query->where('id', -1);
+            }
+        }
+
+        $employees = $query->get();
         $departments = Department::all();
 
         return Inertia::render('admin/employees/index', [
