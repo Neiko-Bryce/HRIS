@@ -24,7 +24,7 @@ export default function Navbar() {
 
     return (
         <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled
-            ? 'bg-background/40 backdrop-blur-xl border-b border-white/20 py-4 shadow-lg'
+            ? 'bg-white/40 backdrop-blur-xl border-b border-white/20 py-4 shadow-lg'
             : 'bg-transparent py-8'
             }`}>
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -92,7 +92,7 @@ export default function Navbar() {
 
                     {/* Mobile Menu Toggle */}
                     <button
-                        className="md:hidden p-2 text-foreground hover:bg-secondary rounded-lg transition-colors"
+                        className="md:hidden p-2 text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
                         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -102,20 +102,20 @@ export default function Navbar() {
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <div className="md:hidden absolute top-full left-0 w-full bg-background border-b border-border p-6 shadow-2xl animate-in slide-in-from-top duration-300">
+                <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-zinc-200 p-6 shadow-2xl animate-in slide-in-from-top duration-300">
                     <div className="flex flex-col gap-6">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 href={link.href}
-                                className="text-lg font-bold text-foreground hover:text-primary transition-colors"
+                                className="text-lg font-bold text-zinc-900 hover:text-primary transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {link.name}
                             </Link>
                         ))}
-                        <hr className="border-border" />
-                        <Link href={route('login')} className="text-lg font-bold text-foreground">
+                        <hr className="border-zinc-200" />
+                        <Link href={route('login')} className="text-lg font-bold text-zinc-900">
                             Login
                         </Link>
                         <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-14 text-base w-full rounded-xl" asChild>

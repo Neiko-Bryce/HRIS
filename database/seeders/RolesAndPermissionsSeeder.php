@@ -13,47 +13,38 @@ class RolesAndPermissionsSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Define Permissions per Photo 2
         $permissions = [
-            // User Management
             'manage users',
             'assign roles',
             'system configuration',
             'view all reports',
-
-            // HR Management
             'employee management',
             'recruitment',
             'attendance monitoring',
             'leave management',
             'payroll management',
             'generate reports',
-
-            // Managerial
             'team leave approvals',
             'performance monitoring',
             'team attendance',
-
-            // Personal
             'personal profile management',
             'leave requests',
             'virtual dtr',
             'view payslips',
         ];
 
+        // Create permissions safely
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::findOrCreate($permission);
         }
 
-        // Define Roles and Assign Permissions
+        // Super Administrator
+        $superAdmin = Role::findOrCreate('Super Administrator');
+        $superAdmin->syncPermissions(Permission::all());
 
-        // 1. Super Administrator
-        $superAdmin = Role::create(['name' => 'Super Administrator']);
-        $superAdmin->givePermissionTo(Permission::all());
-
-        // 2. HR Administrator
-        $hrAdmin = Role::create(['name' => 'HR Administrator']);
-        $hrAdmin->givePermissionTo([
+        // HR Administrator
+        $hrAdmin = Role::findOrCreate('HR Administrator');
+        $hrAdmin->syncPermissions([
             'employee management',
             'recruitment',
             'attendance monitoring',
@@ -66,9 +57,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view payslips',
         ]);
 
-        // 3. Head Employee
-        $headEmployee = Role::create(['name' => 'Head Employee']);
-        $headEmployee->givePermissionTo([
+        // Head Employee
+        $headEmployee = Role::findOrCreate('Head Employee');
+        $headEmployee->syncPermissions([
             'team leave approvals',
             'performance monitoring',
             'team attendance',
@@ -78,9 +69,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view payslips',
         ]);
 
-        // 4. Employee
-        $employee = Role::create(['name' => 'Employee']);
-        $employee->givePermissionTo([
+        // Employee
+        $employee = Role::findOrCreate('Employee');
+        $employee->syncPermissions([
             'personal profile management',
             'leave requests',
             'virtual dtr',

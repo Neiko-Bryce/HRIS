@@ -47,7 +47,45 @@ class AttendanceController extends Controller
 
     public function qrTerminal()
     {
-        return Inertia::render('admin/attendance/qr-terminal');
+        $logs = Attendance::with('user')
+            ->whereDate('date', now()->toDateString())
+            ->latest('updated_at')
+            ->take(20)
+            ->get()
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'name' => $a->user?->name ?? 'Unknown',
+                'time_in' => $a->time_in,
+                'time_out' => $a->time_out,
+                'status' => $a->status,
+            ]);
+
+        return Inertia::render('attendance/Kiosk', [
+            'logs' => $logs,
+            'total' => $logs->count(),
+            'scanUrl' => url('/attendance/scan'),
+        ]);
+    }
+
+    public function kioskLogs()
+    {
+        $logs = Attendance::with('user')
+            ->whereDate('date', now()->toDateString())
+            ->latest('updated_at')
+            ->take(20)
+            ->get()
+            ->map(fn ($a) => [
+                'id' => $a->id,
+                'name' => $a->user?->name ?? 'Unknown',
+                'time_in' => $a->time_in,
+                'time_out' => $a->time_out,
+                'status' => $a->status,
+            ]);
+
+        return response()->json([
+            'logs' => $logs,
+            'total' => $logs->count(),
+        ]);
     }
 
     public function check()

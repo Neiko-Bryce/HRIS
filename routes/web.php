@@ -19,6 +19,10 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+// Public kiosk routes — no login required (designed for wall-mounted displays)
+Route::get('/attendance/kiosk', [AttendanceController::class, 'qrTerminal'])->name('attendance.kiosk');
+Route::get('/attendance/kiosk-logs', [AttendanceController::class, 'kioskLogs'])->name('attendance.kiosk-logs');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/attendance/check', [AttendanceController::class, 'check'])->name('attendance.check');
@@ -53,8 +57,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports/employees', [ReportsController::class, 'exportEmployees'])->name('reports.employees');
         Route::get('reports/attendance', [ReportsController::class, 'exportAttendance'])->name('reports.attendance');
 
-        // Virtual DTR Display Terminal
-        Route::get('attendance/qr-terminal', [AttendanceController::class, 'qrTerminal'])->name('attendance.qr-terminal');
+        // Virtual DTR Display Terminal (legacy admin link — redirects to public kiosk)
+        Route::get('attendance/qr-terminal', function () {
+            return redirect()->route('attendance.kiosk');
+        })->name('attendance.qr-terminal');
 
         // HR Leave Management
         Route::resource('leaves', LeaveController::class)->except(['create', 'show', 'edit'])->parameters(['leaves' => 'leaf']);
